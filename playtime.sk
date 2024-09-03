@@ -42,7 +42,7 @@ on join:
 		set {playtime.minutes::%player%} to 0
 	
 #======================================================================================
-#							COMMAND
+#				COMMAND
 				
 command /playtime [<offlineplayer>]:
 	usage: /playtime
