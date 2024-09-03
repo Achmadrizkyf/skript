@@ -1,0 +1,118 @@
+every 1 second: 
+	loop all players:
+
+		if {playtime.stop::%loop-player%} is true:
+			add 1 to {playtime.second::%loop-player%}
+			if {playtime.second::%loop-player%} is more than 59:
+				set {playtime.second::%loop-player%} to 0
+				add 1 to {playtime.minutes::%loop-player%}
+				if {playtime.minutes::%loop-player%} is more than 59:
+					set {playtime.minutes::%loop-player%} to 0
+					add 1 to {playtime.hours::%loop-player%}
+				else if {playtime.minutes::%loop-player%} is 30:
+					add 1 to {playtime.point::%loop-player%}
+					if {playtime.hours::%loop-player%} is more than 23:
+						set {playtime.hours::%loop-player%} to 0
+						add 1 to {playtime.days::%loop-player%}
+
+
+		if {playtime.watch::%loop-player%} is set:
+			send action bar "&a%{playtime.days::%loop-player%}% &rhari, &a%{playtime.hours::%loop-player%}% &rjam, &a%{playtime.minutes::%loop-player%}% &rmenit, &a%{playtime.second::%loop-player%}% &rdetik" to loop-player
+		
+
+on placeholderapi placeholder request for the prefix "playtime":
+	if the identifier is "placeholder":
+		if {playtime.days::%player%} < 1:	
+			set the result to "%{playtime.hours::%player%}%h, %{playtime.minutes::%player%}%m, %{playtime.second::%player%}%s"
+			if {playtime.hours::%player%} < 1:
+				set the result to "%{playtime.minutes::%player%}%m, %{playtime.second::%player%}%s"
+			else:
+				set the result to "%{playtime.hours::%player%}%h, %{playtime.minutes::%player%}%m"
+		else:
+			set the result to "%{playtime.days::%player%}%d, %{playtime.hours::%player%}%h"
+
+on join:
+	if {playtime.stop::%player%} is false:
+		set {playtime.stop::%player%} to false
+	else if {playtime.point::%player%} is not set:
+		set {playtime.point::%player%} to 0
+	else if {playtime.days::%player%} is not set:
+		set {playtime.days::%player%} to 0
+		set {playtime.hours::%player%} to 0
+		set {playtime.minutes::%player%} to 0
+	
+#======================================================================================
+#							COMMAND
+				
+command /playtime [<offlineplayer>]:
+	usage: /playtime
+	trigger:
+		if arg-1 is not set:
+			send "&7[&cPlaytime&7] &eKamu telah bermain selama &c%{playtime.days::%player%}% &ehari, &c%{playtime.hours::%player%}% &ejam, &c%{playtime.minutes::%player%}% &emenit, &c%{playtime.second::%player%}% &edetik" to player
+			stop trigger
+		if arg-1 is set:
+			if player has permission "use.playtimeuser":
+				if arg-1 is player:
+					send "&7[&cPlaytime&7] &eKamu telah bermain selama &c%{playtime.days::%player%}% &ehari, &c%{playtime.hours::%player%}% &ejam, &c%{playtime.minutes::%player%}% &emenit, &c%{playtime.second::%player%}% &edetik" to player
+					stop trigger
+				else:
+					if {playtime.days::%arg-1%} is set:
+						send "&7[&cPlaytime&7] &e%arg-1% telah bermain selama &c%{playtime.days::%arg-1%}% &ehari, &c%{playtime.hours::%arg-1%}% &ejam, &c%{playtime.minutes::%arg-1%}% &emenit, &c%{playtime.second::%arg-1%}% &edetik" to player
+						stop trigger
+					else:
+						send "&7[&cPlaytime&7] &ePlayer tidak pernah login"
+			else:
+				send "&cKamu tidak memiliki askses!"
+				
+	
+		
+command /playtimewatch:
+	aliases: /ptw
+	usage: /(p)lay(t)ime(w)atch
+	trigger:
+		if {playtime.watch::%player%} is not set:
+			set {playtime.watch::%player%} to true
+			send "&7[&cPlaytime&7] &eKamu mengaktifkan playtime watch"
+			stop trigger
+			
+		else:
+			delete {playtime.watch::%player%}
+			send "&7[&cPlaytime&7] &eKamu menonaktifkan playtime watch"
+			stop trigger
+command /playtimereload:
+	permission: use.playtimereload
+	aliases: /pr
+	trigger:
+		make console execute "skript reload playtime.sk"
+        
+
+command /setplaytime [<offlineplayer>] [<number>] [<number>] [<number>] [<number>]:
+	permission: use.spt
+	aliases: /spt
+	trigger:
+		if arg-1 is set:
+			if arg-1 hasn't played before:
+				send "&cPlayer tidak pernah bermain di server ini!"
+			else:
+				if arg-2 is number:
+					set {playtime.second::%arg-1%} to arg-2
+					if arg-3 is number:
+						set {playtime.minutes::%arg-1%} to arg-3
+						if arg-4 is number:
+							set {playtime.hours::%arg-1%} to arg-4
+							if arg-5 is number:
+								set {playtime.days::%arg-1%} to arg-5
+
+command /stopplaytime [<text>]:
+	permission: stop.playtime.use
+	aliases: /stp
+	trigger:
+		if arg-1 is "off":
+			set {playtime.stop::%player%} to false
+		else if arg-1 is "on":
+			set {playtime.stop::%player%} to true
+		else:
+			send "Cara gunain tod on/off" to player							LEVEL SYSTEM
+
+		
+		
